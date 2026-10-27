@@ -1,0 +1,68 @@
+name: Build Cure Yesu Mwana Wa Mtu for Windows
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.38.4'
+          channel: stable
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Rename application executable
+        shell: pwsh
+        run: |
+          $release = "build\windows\x64\runner\Release"
+          $exe = Join-Path $release "mariage.exe"
+          if (!(Test-Path $exe)) {
+            throw "Executable Flutter introuvable : $exe"
+          }
+          Rename-Item -Path $exe -NewName "CureYesuMwanaWaMtu.exe"
+
+      - name: Download Visual C++ Redistributable
+        shell: pwsh
+        run: |
+          Invoke-WebRequest `
+            -Uri "https://aka.ms/vs/17/release/vc_redist.x64.exe" `
+            -OutFile "vc_redist.x64.exe"
+          if (!(Test-Path "vc_redist.x64.exe") -or
+              (Get-Item "vc_redist.x64.exe").Length -lt 10000000) {
+            throw "Téléchargement du redistribuable Visual C++ invalide."
+          }
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Compile installer
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "cure-yesu-mwana-wa-mtu.iss"
+          if (!(Test-Path "Cure-Yesu-Mwana-Wa-Mtu-Setup.exe")) {
+            throw "L'installateur n'a pas été généré."
+          }
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Cure-Yesu-Mwana-Wa-Mtu-Setup
+          path: Cure-Yesu-Mwana-Wa-Mtu-Setup.exe
+          if-no-files-found: error
