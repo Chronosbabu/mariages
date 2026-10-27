@@ -10,26 +10,29 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   http: ^1.2.2
   socket_io_client: ^2.0.3
   path_provider: ^2.1.4
-  intl: ^0.19.0
+  intl: ^0.20.2
   shared_preferences: ^2.3.2
+  pdf: ^3.11.1
+  printing: ^5.13.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.10.0
+  flutter_launcher_icons: ^0.14.4
 
 # flutter launcher icons config
-flutter_icons:
+flutter_launcher_icons:
   android: true
   ios: true
   image_path: "icon.png"
 
 flutter:
   uses-material-design: true
-
